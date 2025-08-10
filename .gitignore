@@ -1,0 +1,98 @@
+
+# IDE and Build System
+*.iml
+.gradle/
+build/
+.idea/
+.kotlin/
+.DS_Store
+*/build
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+
+# Xcode and iOS
+xcuserdata/
+Pods/
+*.xcworkspace
+!*.xcworkspace/contents.xcworkspacedata
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+
+# Security and Certificates
+*.jks
+*.gpg
+*.keystore
+*.key
+*.pem
+*.p12
+*.mobileprovision
+
+# Dependencies
+*yarn.lock
+node_modules/
+kotlin-js-store/
+
+# API Keys and Sensitive Information
+# IMPORTANT: Never commit API keys or sensitive credentials
+api_keys.properties
+secrets.properties
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs and Temporary Files
+*.log
+logs/
+*.tmp
+*.temp
+*.bak
+*.swp
+*~.nib
+
+# OS Generated Files
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Test and Coverage
+test-results/
+test-reports/
+coverage/
+*.lcov
+
+# Build Artifacts
+dist/
+*.apk
+*.aab
+*.ipa
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.msi
+*.exe
+
+# Runtime
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# IDE Specific
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Gradle Wrapper (keep the jar)
+!gradle/wrapper/gradle-wrapper.jar
+
+# Version Control
+.svn/
