@@ -1,6 +1,6 @@
-# Exercise Library - Compose Multiplatform Application
+# Xercise - Compose Multiplatform Application
 
-A comprehensive exercise library application built with Kotlin Multiplatform and Compose Multiplatform, providing access to a vast database of exercises organized by muscle groups and body parts.
+A comprehensive exercise application built with Kotlin Multiplatform and Compose Multiplatform, providing access to a vast database of exercises organized by muscle groups and body parts.
 
 ## 🏋️‍♂️ Features
 

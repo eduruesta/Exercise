@@ -1,20 +1,34 @@
 package org.dev.exercises
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import kotlinx.serialization.Serializable
 import org.dev.exercises.di.appModule
-import org.dev.exercises.domain.model.BodyPart
+import org.dev.exercises.presentation.screen.ExerciseDetailScreen
 import org.dev.exercises.presentation.screen.ExercisesScreen
 import org.dev.exercises.presentation.screen.MuscleListScreen
 import org.dev.exercises.theme.AppTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplication
 
-sealed class Screen {
-    object MuscleList : Screen()
-    data class ExerciseList(val bodyPart: BodyPart) : Screen()
-}
+// Navigation routes
+@Serializable
+object MuscleList
+
+@Serializable
+data class ExerciseList(val bodyPart: String)
+
+@Serializable
+data class ExerciseDetail(val exerciseId: String, val bodyPart: String)
 
 @Preview
 @Composable
@@ -22,28 +36,46 @@ internal fun App() = AppTheme {
     KoinApplication(application = {
         modules(appModule)
     }) {
-        var currentScreen by remember { mutableStateOf<Screen>(Screen.MuscleList) }
+        val navController = rememberNavController()
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .windowInsetsPadding(WindowInsets.safeDrawing)
         ) {
-            val screen = currentScreen
-            when (screen) {
-                is Screen.MuscleList -> {
+            NavHost(
+                navController = navController,
+                startDestination = MuscleList
+            ) {
+                composable<MuscleList> {
                     MuscleListScreen(
                         onMuscleClick = { bodyPart ->
-                            currentScreen = Screen.ExerciseList(bodyPart)
+                            navController.navigate(ExerciseList(bodyPart.name))
                         }
                     )
                 }
 
-                is Screen.ExerciseList -> {
+                composable<ExerciseList> { backStackEntry ->
+                    val exerciseList = backStackEntry.toRoute<ExerciseList>()
+
                     ExercisesScreen(
-                        bodyPart = screen.bodyPart,
+                        bodyPartName = exerciseList.bodyPart,
                         onBackClick = {
-                            currentScreen = Screen.MuscleList
+                            navController.popBackStack()
+                        },
+                        onExerciseClick = { exerciseId ->
+                            navController.navigate(ExerciseDetail(exerciseId, exerciseList.bodyPart))
+                        }
+                    )
+                }
+
+                composable<ExerciseDetail> { backStackEntry ->
+                    val exerciseDetail = backStackEntry.toRoute<ExerciseDetail>()
+
+                    ExerciseDetailScreen(
+                        exerciseId = exerciseDetail.exerciseId,
+                        onBackClick = {
+                            navController.popBackStack()
                         }
                     )
                 }

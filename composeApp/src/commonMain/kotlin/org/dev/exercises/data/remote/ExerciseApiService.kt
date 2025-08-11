@@ -1,9 +1,13 @@
 package org.dev.exercises.data.remote
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import org.dev.exercises.domain.model.BodyPartsApiResponse
 import org.dev.exercises.domain.model.ExerciseApiResponse
+import org.dev.exercises.domain.model.ExerciseDetailApiResponse
 
 class ExerciseApiService(
     private val httpClient: HttpClient
@@ -15,6 +19,7 @@ class ExerciseApiService(
         private const val API_KEY = "f37565d2b3mshd71eb862b546083p1b3fdajsn8c803ca1eff6"
         private const val API_HOST = "exercisedb-api1.p.rapidapi.com"
         private const val EXERCISES_ENDPOINT = "$BASE_URL/exercises"
+        private const val BODYPARTS_ENDPOINT = "$BASE_URL/bodyparts"
     }
 
     suspend fun getExercises(
@@ -43,6 +48,20 @@ class ExerciseApiService(
             parameter("limit", limit.coerceIn(1, 25))
             after?.let { parameter("after", it) }
             before?.let { parameter("before", it) }
+        }.body()
+    }
+
+    suspend fun getExerciseById(exerciseId: String): ExerciseDetailApiResponse {
+        return httpClient.get("$EXERCISES_ENDPOINT/$exerciseId") {
+            header("x-rapidapi-key", API_KEY)
+            header("x-rapidapi-host", API_HOST)
+        }.body()
+    }
+
+    suspend fun getBodyParts(): BodyPartsApiResponse {
+        return httpClient.get(BODYPARTS_ENDPOINT) {
+            header("x-rapidapi-key", API_KEY)
+            header("x-rapidapi-host", API_HOST)
         }.body()
     }
 }

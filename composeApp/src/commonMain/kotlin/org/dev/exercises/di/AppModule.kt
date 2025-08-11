@@ -11,10 +11,12 @@ import org.dev.exercises.data.remote.ExerciseApiService
 import org.dev.exercises.data.repository.ExerciseRepositoryImpl
 import org.dev.exercises.domain.repository.ExerciseRepository
 import org.dev.exercises.domain.usecase.GetExercisesGroupedByMuscleUseCase
+import org.dev.exercises.domain.usecase.GetExerciseByIdUseCase
+import org.dev.exercises.domain.usecase.GetBodyPartsUseCase
 import org.dev.exercises.presentation.viewmodel.ExerciseViewModel
 
 val appModule = module {
-    
+
     // HTTP Client
     single {
         HttpClient {
@@ -29,16 +31,18 @@ val appModule = module {
             }
         }
     }
-    
+
     // API Service
     single { ExerciseApiService(get()) }
-    
+
     // Repository
     single<ExerciseRepository> { ExerciseRepositoryImpl(get()) }
-    
+
     // Use Cases
     single { GetExercisesGroupedByMuscleUseCase(get()) }
-    
+    single { GetExerciseByIdUseCase(get()) }
+    single { GetBodyPartsUseCase(get()) }
+
     // ViewModels
-    viewModel { ExerciseViewModel(get()) }
+    viewModel { ExerciseViewModel(get<GetExercisesGroupedByMuscleUseCase>(), get<GetExerciseByIdUseCase>(), get<GetBodyPartsUseCase>()) }
 }

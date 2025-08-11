@@ -1,13 +1,12 @@
 package org.dev.exercises.domain.usecase
 
-import org.dev.exercises.domain.model.BodyPart
 import org.dev.exercises.domain.model.Exercise
 import org.dev.exercises.domain.repository.ExerciseRepository
 
 class GetExercisesGroupedByMuscleUseCase(
     private val repository: ExerciseRepository
 ) {
-    suspend operator fun invoke(): Result<Map<BodyPart, List<Exercise>>> {
+    suspend operator fun invoke(): Result<Map<String, List<Exercise>>> {
         return try {
             val allExercisesResult = repository.getAllExercises()
 
@@ -18,14 +17,11 @@ class GetExercisesGroupedByMuscleUseCase(
             val exercises = allExercisesResult.getOrNull() ?: emptyList()
 
             // Create a map to group exercises by body parts
-            val groupedExercises = mutableMapOf<BodyPart, MutableList<Exercise>>()
+            val groupedExercises = mutableMapOf<String, MutableList<Exercise>>()
 
             exercises.forEach { exercise ->
                 exercise.bodyParts.forEach { bodyPartString ->
-                    val bodyPart = BodyPart.values().find { it.value == bodyPartString }
-                    if (bodyPart != null) {
-                        groupedExercises.getOrPut(bodyPart) { mutableListOf() }.add(exercise)
-                    }
+                    groupedExercises.getOrPut(bodyPartString) { mutableListOf() }.add(exercise)
                 }
             }
 

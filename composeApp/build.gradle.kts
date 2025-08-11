@@ -61,6 +61,11 @@ kotlin {
 
             // ViewModel
             implementation(libs.lifecycle.viewmodel)
+
+            implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+
+            implementation(libs.navigation.compose)
+
         }
 
         commonTest.dependencies {
@@ -81,6 +86,9 @@ kotlin {
 
             // Coroutines Android
             implementation(libs.kotlinx.coroutines.android)
+
+            // Coil Network for Android
+            implementation(libs.coil3.coil.network.ktor)
         }
 
         jvmMain.dependencies {
@@ -91,11 +99,16 @@ kotlin {
 
             // Coroutines JVM
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
+
+            // Coil Network for JVM
+            implementation(libs.coil3.coil.network.ktor)
         }
 
         iosMain.dependencies {
             // Ktor iOS
             implementation(libs.ktor.client.darwin)
+            implementation(libs.coil3.coil.network.ktor)
+
         }
 
     }
@@ -129,7 +142,7 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "Exercises"
+            packageName = "Xercise"
             packageVersion = "1.0.0"
 
             linux {

@@ -1,6 +1,6 @@
 package org.dev.exercises.presentation.screen
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,21 +27,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.dev.exercises.domain.model.BodyPart
+import coil3.compose.AsyncImage
 import org.dev.exercises.domain.model.Exercise
-import org.dev.exercises.presentation.viewmodel.ExerciseUiState
+import org.dev.exercises.presentation.components.LabeledInfoBubbleRow
+import org.dev.exercises.presentation.utils.toDisplayText
 import org.dev.exercises.presentation.viewmodel.ExerciseViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExercisesScreen(
-    bodyPart: BodyPart,
-    onBackClick: () -> Unit
+    bodyPartName: String,
+    onBackClick: () -> Unit,
+    onExerciseClick: (String) -> Unit
 ) {
     val viewModel: ExerciseViewModel = koinViewModel()
 
@@ -60,7 +62,7 @@ fun ExercisesScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "← Back",
+                text = "←",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -69,7 +71,7 @@ fun ExercisesScreen(
             )
 
             Text(
-                text = "🎯 " + bodyPart.displayName + " Exercises",
+                text = bodyPartName.toDisplayText() + " Exercises",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.weight(1f)
@@ -94,8 +96,9 @@ fun ExercisesScreen(
 
             else -> {
                 ExercisesContent(
-                    bodyPart = bodyPart,
-                    exercises = uiState.exercisesByMuscle[bodyPart] ?: emptyList()
+                    bodyPartName = bodyPartName,
+                    exercises = uiState.exercisesByMuscle[bodyPartName] ?: emptyList(),
+                    onExerciseClick = onExerciseClick
                 )
             }
         }
@@ -131,23 +134,33 @@ private fun ErrorContent(
         contentAlignment = Alignment.Center
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(32.dp)
         ) {
             Text(
-                text = "❌ Error",
+                text = "🚫",
+                style = MaterialTheme.typography.displayMedium
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Connection Problem",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.error
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = error,
+                text = "We're having trouble connecting to our servers. Please check your internet connection and try again.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 32.dp)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onRetry) {
-                Text("Retry")
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = onRetry,
+                modifier = Modifier.fillMaxWidth(0.6f)
+            ) {
+                Text("Try Again")
             }
         }
     }
@@ -181,8 +194,9 @@ private fun EmptyContent(onRetry: () -> Unit) {
 
 @Composable
 private fun ExercisesContent(
-    bodyPart: BodyPart,
-    exercises: List<Exercise>
+    bodyPartName: String,
+    exercises: List<Exercise>,
+    onExerciseClick: (String) -> Unit
 ) {
     if (exercises.isEmpty()) {
         Box(
@@ -190,7 +204,7 @@ private fun ExercisesContent(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "No exercises found for ${bodyPart.displayName}",
+                text = "No exercises found for ${bodyPartName.toDisplayText()}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -200,7 +214,10 @@ private fun ExercisesContent(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(exercises) { exercise ->
-                ExerciseItem(exercise = exercise)
+                ExerciseItem(
+                    exercise = exercise,
+                    onExerciseClick = onExerciseClick
+                )
             }
         }
     }
@@ -208,62 +225,72 @@ private fun ExercisesContent(
 
 
 @Composable
-private fun ExerciseItem(exercise: Exercise) {
+private fun ExerciseItem(
+    exercise: Exercise,
+    onExerciseClick: (String) -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onExerciseClick(exercise.exerciseId) },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         )
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp)
+        Row(
+            modifier = Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = exercise.name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+            // Exercise Image
+            AsyncImage(
+                model = exercise.imageUrl,
+                contentDescription = exercise.name,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = "Type: ${exercise.exerciseType}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            if (exercise.equipments.isNotEmpty()) {
+            // Exercise Information
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 Text(
-                    text = "Equipment: ${exercise.equipments.joinToString(", ")}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = exercise.name.toDisplayText(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
-            }
 
-            if (exercise.bodyParts.isNotEmpty()) {
-                Text(
-                    text = "Body Parts: ${exercise.bodyParts.joinToString(", ")}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+
+                LabeledInfoBubbleRow(
+                    label = "Equipment",
+                    items = exercise.equipments,
+                    backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    textColor = MaterialTheme.colorScheme.onTertiaryContainer
                 )
-            }
 
-            if (exercise.targetMuscles.isNotEmpty()) {
-                Text(
-                    text = "Target Muscles: ${exercise.targetMuscles.joinToString(", ")}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                LabeledInfoBubbleRow(
+                    label = "Body Parts",
+                    items = exercise.bodyParts,
+                    backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                    textColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
-            }
 
-            if (exercise.secondaryMuscles.isNotEmpty()) {
-                Text(
-                    text = "Secondary Muscles: ${exercise.secondaryMuscles.joinToString(", ")}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                LabeledInfoBubbleRow(
+                    label = "Target Muscles",
+                    items = exercise.targetMuscles,
+                    backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                    textColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+
+                LabeledInfoBubbleRow(
+                    label = "Secondary Muscles",
+                    items = exercise.secondaryMuscles,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    textColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
     }
 }
-

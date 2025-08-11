@@ -10,13 +10,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,18 +25,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.dev.exercises.domain.model.BodyPart
-import org.dev.exercises.presentation.viewmodel.ExerciseUiState
+import coil3.compose.AsyncImage
+import org.dev.exercises.domain.model.BodyPartData
+import org.dev.exercises.presentation.utils.toDisplayText
 import org.dev.exercises.presentation.viewmodel.ExerciseViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MuscleListScreen(
-    onMuscleClick: (BodyPart) -> Unit
+    onMuscleClick: (BodyPartData) -> Unit
 ) {
     val viewModel: ExerciseViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -47,7 +50,7 @@ fun MuscleListScreen(
     ) {
         // Header
         Text(
-            text = "💪 Exercise Library",
+            text = "XercisePro",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -78,7 +81,7 @@ fun MuscleListScreen(
 
             else -> {
                 MuscleGroupList(
-                    bodyParts = uiState.exercisesByMuscle.keys.toList(),
+                    bodyParts = uiState.bodyParts,
                     exercisesByMuscle = uiState.exercisesByMuscle,
                     onMuscleClick = onMuscleClick
                 )
@@ -116,23 +119,33 @@ private fun ErrorContent(
         contentAlignment = Alignment.Center
     ) {
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(32.dp)
         ) {
             Text(
-                text = "❌ Error",
+                text = "🚫",
+                style = MaterialTheme.typography.displayMedium
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Connection Problem",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.error
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = error,
+                text = "We're having trouble connecting to our servers. Please check your internet connection and try again.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 32.dp)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onRetry) {
-                Text("Retry")
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = onRetry,
+                modifier = Modifier.fillMaxWidth(0.6f)
+            ) {
+                Text("Try Again")
             }
         }
     }
@@ -165,19 +178,26 @@ private fun EmptyContent(onRetry: () -> Unit) {
 }
 
 @Composable
-private fun MuscleGroupList(
-    bodyParts: List<BodyPart>,
-    exercisesByMuscle: Map<BodyPart, List<org.dev.exercises.domain.model.Exercise>>,
-    onMuscleClick: (BodyPart) -> Unit
+internal fun MuscleGroupList(
+    bodyParts: List<BodyPartData>,
+    exercisesByMuscle: Map<String, List<org.dev.exercises.domain.model.Exercise>>,
+    onMuscleClick: (BodyPartData) -> Unit
 ) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(bodyParts.sortedBy { it.displayName }) { bodyPart ->
+        items(
+            bodyParts
+                .sortedBy { it.name }
+                .filter { bodyPartData ->
+                    // Only include body parts that have exercises available
+                    (exercisesByMuscle[bodyPartData.name]?.size ?: 0) > 0
+                }
+        ) { bodyPartData ->
             MuscleGroupCard(
-                bodyPart = bodyPart,
-                exerciseCount = exercisesByMuscle[bodyPart]?.size ?: 0,
-                onClick = { onMuscleClick(bodyPart) }
+                bodyPartData = bodyPartData,
+                exerciseCount = exercisesByMuscle[bodyPartData.name]?.size ?: 0,
+                onClick = { onMuscleClick(bodyPartData) }
             )
         }
     }
@@ -185,7 +205,7 @@ private fun MuscleGroupList(
 
 @Composable
 private fun MuscleGroupCard(
-    bodyPart: BodyPart,
+    bodyPartData: BodyPartData,
     exerciseCount: Int,
     onClick: () -> Unit
 ) {
@@ -199,14 +219,24 @@ private fun MuscleGroupCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Body Part Image
+            AsyncImage(
+                model = bodyPartData.imageUrl,
+                contentDescription = bodyPartData.name,
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                contentScale = ContentScale.Crop
+            )
+
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = getBodyPartEmoji(bodyPart) + " " + bodyPart.displayName,
+                    text = bodyPartData.name.toDisplayText(),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -225,30 +255,5 @@ private fun MuscleGroupCard(
                 color = MaterialTheme.colorScheme.primary
             )
         }
-    }
-}
-
-private fun getBodyPartEmoji(bodyPart: BodyPart): String {
-    return when (bodyPart) {
-        BodyPart.WAIST -> "🔥"
-        BodyPart.QUADRICEPS -> "🦵"
-        BodyPart.THIGHS -> "🦵"
-        BodyPart.BACK -> "🔙"
-        BodyPart.TRICEPS -> "🦾"
-        BodyPart.UPPER_ARMS -> "💪"
-        BodyPart.CALVES -> "🦶"
-        BodyPart.BICEPS -> "💪"
-        BodyPart.CHEST -> "🫁"
-        BodyPart.SHOULDERS -> "🤲"
-        BodyPart.FOREARMS -> "🤏"
-        BodyPart.GLUTES -> "🍑"
-        BodyPart.HAMSTRINGS -> "🦵"
-        BodyPart.LATS -> "🪶"
-        BodyPart.LOWER_BACK -> "⬇️"
-        BodyPart.MIDDLE_BACK -> "🔙"
-        BodyPart.NECK -> "🦒"
-        BodyPart.TRAPS -> "🔺"
-        BodyPart.ABDOMINALS -> "🔥"
-        BodyPart.CORE -> "🔥"
     }
 }

@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:icon="@mipmap/ic_launcher"
-        android:label="Exercises"
-        android:theme="@android:style/Theme.Material.NoActionBar">
+        android:label="XercisePro"
+        android:theme="@android:style/Theme.Material.NoActionBar"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".AppActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"

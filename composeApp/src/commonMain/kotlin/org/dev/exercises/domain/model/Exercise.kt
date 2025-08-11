@@ -18,6 +18,24 @@ data class ExerciseMeta(
 )
 
 @Serializable
+data class ExerciseDetailApiResponse(
+    val success: Boolean,
+    val data: Exercise
+)
+
+@Serializable
+data class BodyPartsApiResponse(
+    val success: Boolean,
+    val data: List<BodyPartData>
+)
+
+@Serializable
+data class BodyPartData(
+    val name: String,
+    val imageUrl: String
+)
+
+@Serializable
 data class Exercise(
     val exerciseId: String,
     val name: String,
@@ -27,47 +45,13 @@ data class Exercise(
     val exerciseType: String,
     val targetMuscles: List<String>,
     val secondaryMuscles: List<String>,
-    val keywords: List<String>
+    val keywords: List<String>,
+    // Additional fields for detailed exercise information
+    val videoUrl: String? = null,
+    val overview: String? = null,
+    val instructions: List<String>? = null,
+    val exerciseTips: List<String>? = null,
+    val variations: List<String>? = null,
+    val relatedExerciseIds: List<String>? = null
 )
 
-enum class ExerciseType(val value: String) {
-    CARDIO("CARDIO"),
-    STRENGTH("STRENGTH"),
-    STRETCHING("STRETCHING"),
-    FLEXIBILITY("FLEXIBILITY")
-}
-
-enum class BodyPart(val value: String, val displayName: String) {
-    WAIST("WAIST", "Waist"),
-    QUADRICEPS("QUADRICEPS", "Quadriceps"),
-    THIGHS("THIGHS", "Thighs"),
-    BACK("BACK", "Back"),
-    TRICEPS("TRICEPS", "Triceps"),
-    UPPER_ARMS("UPPER ARMS", "Upper Arms"),
-    CALVES("CALVES", "Calves"),
-    BICEPS("BICEPS", "Biceps"),
-    CHEST("CHEST", "Chest"),
-    SHOULDERS("SHOULDERS", "Shoulders"),
-    FOREARMS("FOREARMS", "Forearms"),
-    GLUTES("GLUTES", "Glutes"),
-    HAMSTRINGS("HAMSTRINGS", "Hamstrings"),
-    LATS("LATS", "Lats"),
-    LOWER_BACK("LOWER BACK", "Lower Back"),
-    MIDDLE_BACK("MIDDLE BACK", "Middle Back"),
-    NECK("NECK", "Neck"),
-    TRAPS("TRAPS", "Traps"),
-    ABDOMINALS("ABDOMINALS", "Abdominals"),
-    CORE("CORE", "Core")
-}
-
-enum class Equipment(val value: String, val displayName: String) {
-    BODY_WEIGHT("BODY WEIGHT", "Body Weight"),
-    DUMBBELL("DUMBBELL", "Dumbbell"),
-    BARBELL("BARBELL", "Barbell"),
-    CABLE("CABLE", "Cable"),
-    MACHINE("MACHINE", "Machine"),
-    KETTLEBELL("KETTLEBELL", "Kettlebell"),
-    RESISTANCE_BAND("RESISTANCE BAND", "Resistance Band"),
-    MEDICINE_BALL("MEDICINE BALL", "Medicine Ball"),
-    STABILITY_BALL("STABILITY BALL", "Stability Ball")
-}

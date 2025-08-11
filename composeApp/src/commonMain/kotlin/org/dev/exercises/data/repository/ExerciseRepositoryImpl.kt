@@ -1,8 +1,8 @@
 package org.dev.exercises.data.repository
 
 import org.dev.exercises.data.remote.ExerciseApiService
+import org.dev.exercises.domain.model.BodyPartData
 import org.dev.exercises.domain.model.Exercise
-import org.dev.exercises.domain.model.BodyPart
 import org.dev.exercises.domain.repository.ExerciseRepository
 
 class ExerciseRepositoryImpl(
@@ -44,6 +44,24 @@ class ExerciseRepositoryImpl(
         return try {
             // Fetch exercises with a higher limit to get more variety
             val response = apiService.getExercises(limit = 25)
+            Result.success(response.data)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getExerciseById(exerciseId: String): Result<Exercise> {
+        return try {
+            val response = apiService.getExerciseById(exerciseId)
+            Result.success(response.data)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getBodyParts(): Result<List<BodyPartData>> {
+        return try {
+            val response = apiService.getBodyParts()
             Result.success(response.data)
         } catch (e: Exception) {
             Result.failure(e)
