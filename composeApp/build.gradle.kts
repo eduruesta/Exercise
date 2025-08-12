@@ -1,6 +1,4 @@
 import org.jetbrains.compose.ExperimentalComposeLibrary
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.compose.reload.gradle.ComposeHotRun
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
@@ -20,7 +18,6 @@ kotlin {
         instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
     }
 
-    jvm()
 
     listOf(
         iosX64(),
@@ -66,6 +63,10 @@ kotlin {
 
             implementation(libs.navigation.compose)
 
+            // RevenueCat (temporarily disabled due to library issues)
+            implementation(libs.purchases.core)
+            implementation(libs.purchases.ui)
+
         }
 
         commonTest.dependencies {
@@ -89,26 +90,28 @@ kotlin {
 
             // Coil Network for Android
             implementation(libs.coil3.coil.network.ktor)
+            
+            // Video Player for Android
+            implementation(libs.media3.exoplayer)
+            implementation(libs.media3.ui)
         }
 
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-
-            // Ktor JVM
-            implementation(libs.ktor.client.java)
-
-            // Coroutines JVM
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.9.0")
-
-            // Coil Network for JVM
-            implementation(libs.coil3.coil.network.ktor)
-        }
 
         iosMain.dependencies {
             // Ktor iOS
             implementation(libs.ktor.client.darwin)
             implementation(libs.coil3.coil.network.ktor)
-
+        }
+        
+        // Configure iOS targets for RevenueCat
+        targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
+            if (name.startsWith("ios")) {
+                compilations["main"].compileTaskProvider.configure {
+                    compilerOptions {
+                        freeCompilerArgs.add("-Xopt-in=kotlinx.cinterop.ExperimentalForeignApi")
+                    }
+                }
+            }
         }
 
     }
@@ -119,7 +122,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 24
         targetSdk = 35
 
         applicationId = "org.dev.exercises.androidApp"
@@ -136,32 +139,4 @@ dependencies {
     debugImplementation(libs.androidx.uitest.testManifest)
 }
 
-compose.desktop {
-    application {
-        mainClass = "MainKt"
 
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "Xercise"
-            packageVersion = "1.0.0"
-
-            linux {
-                iconFile.set(project.file("desktopAppIcons/LinuxIcon.png"))
-            }
-            windows {
-                iconFile.set(project.file("desktopAppIcons/WindowsIcon.ico"))
-            }
-            macOS {
-                iconFile.set(project.file("desktopAppIcons/MacosIcon.icns"))
-                bundleID = "org.dev.exercises.desktopApp"
-            }
-        }
-    }
-}
-
-tasks.withType<ComposeHotRun>().configureEach {
-    mainClass = "MainKt"
-    javaLauncher.set(javaToolchains.launcherFor {
-        languageVersion.set(JavaLanguageVersion.of(22))
-    })
-}

@@ -14,9 +14,15 @@ lifecycle-viewmodel = "2.8.7"
 kotlinx-coroutines = "1.9.0"
 kotlinx-serialization = "1.7.3"
 navigation-compose = "2.9.0-beta03"
+purchases-kmp = "2.1.0+16.2.0"
+media3-exoplayer = "1.8.0"
+avkit-player = "0.0.1"
+
 
 [libraries]
-
+# RevenueCat
+purchases-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "purchases-kmp" }
+purchases-ui = { module = "com.revenuecat.purchases:purchases-kmp-ui", version.ref = "purchases-kmp" }
 androidx-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-uitest-testManifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-uiTest" }
 androidx-uitest-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "androidx-uiTest" }
@@ -30,7 +36,6 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
-ktor-client-java = { module = "io.ktor:ktor-client-java", version.ref = "ktor" }
 
 # Koin
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
@@ -50,6 +55,10 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 
 # Navigation
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
+
+# Video Player
+media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3-exoplayer" }
+media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3-exoplayer" }
 
 [plugins]
 

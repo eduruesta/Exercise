@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,11 +35,13 @@ import coil3.compose.AsyncImage
 import org.dev.exercises.domain.model.BodyPartData
 import org.dev.exercises.presentation.utils.toDisplayText
 import org.dev.exercises.presentation.viewmodel.ExerciseViewModel
+import org.dev.exercises.data.subscription.PremiumManager
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MuscleListScreen(
-    onMuscleClick: (BodyPartData) -> Unit
+    onMuscleClick: (BodyPartData) -> Unit,
+    onSubscriptionClick: () -> Unit = {}
 ) {
     val viewModel: ExerciseViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
@@ -83,7 +86,8 @@ fun MuscleListScreen(
                 MuscleGroupList(
                     bodyParts = uiState.bodyParts,
                     exercisesByMuscle = uiState.exercisesByMuscle,
-                    onMuscleClick = onMuscleClick
+                    onMuscleClick = onMuscleClick,
+                    onSubscriptionClick = onSubscriptionClick
                 )
             }
         }
@@ -181,24 +185,46 @@ private fun EmptyContent(onRetry: () -> Unit) {
 internal fun MuscleGroupList(
     bodyParts: List<BodyPartData>,
     exercisesByMuscle: Map<String, List<org.dev.exercises.domain.model.Exercise>>,
-    onMuscleClick: (BodyPartData) -> Unit
+    onMuscleClick: (BodyPartData) -> Unit,
+    onSubscriptionClick: () -> Unit
 ) {
+    val isPremiumUser = PremiumManager.isPremiumUser()
+    
+    val filteredBodyParts = bodyParts
+        .sortedBy { it.name }
+        .filter { bodyPartData ->
+            // Only include body parts that have exercises available
+            (exercisesByMuscle[bodyPartData.name]?.size ?: 0) > 0
+        }
+    
+    val displayBodyParts = if (isPremiumUser) {
+        filteredBodyParts // Show all for premium users
+    } else {
+        filteredBodyParts.take(4) // Show only 4 for free users
+    }
+    
+    val hasMoreBodyParts = !isPremiumUser && filteredBodyParts.size > 4
+    
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(
-            bodyParts
-                .sortedBy { it.name }
-                .filter { bodyPartData ->
-                    // Only include body parts that have exercises available
-                    (exercisesByMuscle[bodyPartData.name]?.size ?: 0) > 0
-                }
-        ) { bodyPartData ->
+        // Show body parts (4 for free users, all for premium users)
+        items(displayBodyParts) { bodyPartData ->
             MuscleGroupCard(
                 bodyPartData = bodyPartData,
                 exerciseCount = exercisesByMuscle[bodyPartData.name]?.size ?: 0,
                 onClick = { onMuscleClick(bodyPartData) }
             )
+        }
+        
+        // Show subscription upsell if there are more body parts
+        if (hasMoreBodyParts) {
+            item {
+                SubscriptionUpsellCard(
+                    remainingBodyParts = filteredBodyParts.size - 4,
+                    onSubscriptionClick = onSubscriptionClick
+                )
+            }
         }
     }
 }
@@ -253,6 +279,74 @@ private fun MuscleGroupCard(
                 text = "→",
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.primary
+            )
+        }
+    }
+}
+
+@Composable
+private fun SubscriptionUpsellCard(
+    remainingBodyParts: Int,
+    onSubscriptionClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "🚀",
+                style = MaterialTheme.typography.displaySmall
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            Text(
+                text = "Upgrade to Premium",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = "Unlock $remainingBodyParts+ more muscle groups, advanced exercises, and video tutorials to maximize your workout potential!",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Button(
+                onClick = onSubscriptionClick,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Text(
+                    text = "Get Premium Access",
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = "✅ All muscle groups • ✅ Video tutorials • ✅ Advanced tracking",
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

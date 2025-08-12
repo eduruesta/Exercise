@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7DDAD8E12E4BDA1D00E40F8F /* PurchasesHybridCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 7DDAD8E02E4BDA1D00E40F8F /* PurchasesHybridCommon */; };
+		7DDAD8E32E4BDA1D00E40F8F /* PurchasesHybridCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = 7DDAD8E22E4BDA1D00E40F8F /* PurchasesHybridCommonUI */; };
 		A93A953B29CC810C00F8E227 /* iosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93A953A29CC810C00F8E227 /* iosApp.swift */; };
 		A93A953F29CC810D00F8E227 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A93A953E29CC810D00F8E227 /* Assets.xcassets */; };
 		A93A954229CC810D00F8E227 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A93A954129CC810D00F8E227 /* Preview Assets.xcassets */; };
@@ -24,6 +26,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7DDAD8E32E4BDA1D00E40F8F /* PurchasesHybridCommonUI in Frameworks */,
+				7DDAD8E12E4BDA1D00E40F8F /* PurchasesHybridCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,6 +120,9 @@
 				Base,
 			);
 			mainGroup = A93A952E29CC810C00F8E227;
+			packageReferences = (
+				7DDAD8DF2E4BDA1D00E40F8F /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */,
+			);
 			productRefGroup = A93A953829CC810C00F8E227 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -371,6 +378,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7DDAD8DF2E4BDA1D00E40F8F /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-hybrid-common";
+			requirement = {
+				kind = exactVersion;
+				version = 16.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7DDAD8E02E4BDA1D00E40F8F /* PurchasesHybridCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7DDAD8DF2E4BDA1D00E40F8F /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
+			productName = PurchasesHybridCommon;
+		};
+		7DDAD8E22E4BDA1D00E40F8F /* PurchasesHybridCommonUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7DDAD8DF2E4BDA1D00E40F8F /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
+			productName = PurchasesHybridCommonUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A93A952F29CC810C00F8E227 /* Project object */;
 }

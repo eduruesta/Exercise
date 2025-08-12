@@ -33,8 +33,10 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import org.dev.exercises.domain.model.Exercise
 import org.dev.exercises.presentation.components.LabeledInfoBubbleRow
+import org.dev.exercises.presentation.components.PremiumVideoSection
 import org.dev.exercises.presentation.utils.toDisplayText
 import org.dev.exercises.presentation.viewmodel.ExerciseViewModel
+import org.dev.exercises.data.subscription.PremiumManager
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -94,7 +96,9 @@ fun ExerciseDetailScreen(
             }
 
             uiState.exercise != null -> {
-                ExerciseDetailContent(exercise = uiState.exercise!!)
+                ExerciseDetailContent(
+                    exercise = uiState.exercise!!
+                )
             }
 
             else -> {
@@ -192,13 +196,27 @@ private fun EmptyContent(onRetry: () -> Unit) {
 }
 
 @Composable
-private fun ExerciseDetailContent(exercise: Exercise) {
+private fun ExerciseDetailContent(
+    exercise: Exercise
+) {
+    val isSubscribed = PremiumManager.isPremiumUser()
+    
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Exercise Header
         item {
             ExerciseHeader(exercise = exercise)
+        }
+        
+        // Premium Video Section (only show if video URL exists)
+        if (!exercise.videoUrl.isNullOrBlank()) {
+            item {
+                PremiumVideoSection(
+                    videoUrl = exercise.videoUrl,
+                    isSubscribed = isSubscribed
+                )
+            }
         }
 
         // Overview

@@ -14,6 +14,9 @@ import org.dev.exercises.domain.usecase.GetExercisesGroupedByMuscleUseCase
 import org.dev.exercises.domain.usecase.GetExerciseByIdUseCase
 import org.dev.exercises.domain.usecase.GetBodyPartsUseCase
 import org.dev.exercises.presentation.viewmodel.ExerciseViewModel
+import org.dev.exercises.presentation.subscription.RevenueCatPaywallViewModel
+import org.dev.exercises.data.subscription.RevenueCatManager
+import org.dev.exercises.data.subscription.RevenueCatManagerImpl
 
 val appModule = module {
 
@@ -43,6 +46,10 @@ val appModule = module {
     single { GetExerciseByIdUseCase(get()) }
     single { GetBodyPartsUseCase(get()) }
 
+    // RevenueCat
+    single<RevenueCatManager> { RevenueCatManagerImpl() }
+
     // ViewModels
     viewModel { ExerciseViewModel(get<GetExercisesGroupedByMuscleUseCase>(), get<GetExerciseByIdUseCase>(), get<GetBodyPartsUseCase>()) }
+    viewModel { RevenueCatPaywallViewModel(get<RevenueCatManager>()) }
 }
