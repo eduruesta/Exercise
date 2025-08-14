@@ -45,14 +45,6 @@ class RevenueCatPaywallViewModel(
         viewModelScope.launch {
             _uiState.value = RevenueCatPaywallState.Loading
             
-            // Ensure RevenueCat is initialized first
-            try {
-                revenueCatManager.initialize(org.dev.exercises.data.subscription.RevenueCatConfig.API_KEY)
-            } catch (e: Exception) {
-                _uiState.value = RevenueCatPaywallState.Error("Failed to initialize payment system: ${e.message}")
-                return@launch
-            }
-            
             try {
                 val offerings = Purchases.sharedInstance.awaitOfferings()
                 offerings.current?.let { currentOffering ->

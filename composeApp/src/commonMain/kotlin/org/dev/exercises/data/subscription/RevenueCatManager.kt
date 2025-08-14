@@ -7,6 +7,7 @@ import com.revenuecat.purchases.kmp.ktx.awaitCustomerInfo
 import com.revenuecat.purchases.kmp.ktx.awaitOfferings
 import com.revenuecat.purchases.kmp.ktx.awaitPurchase
 import com.revenuecat.purchases.kmp.models.PurchasesException
+import com.revenuecat.purchases.kmp.PurchasesDelegate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -59,7 +60,7 @@ interface RevenueCatManager {
     fun checkEntitlement(entitlementId: String): Boolean
 }
 
-class RevenueCatManagerImpl : RevenueCatManager {
+class RevenueCatManagerImpl : RevenueCatManager, PurchasesDelegate {
     
     private val _customerInfo = MutableStateFlow<CustomerInfo?>(null)
     override val customerInfo: StateFlow<CustomerInfo?> = _customerInfo.asStateFlow()
@@ -80,6 +81,10 @@ class RevenueCatManagerImpl : RevenueCatManager {
                     // Optional: set app user ID
                     // appUserId = "<app_user_id>"
                 }
+                
+                // Set the delegate to listen for customer info updates
+                Purchases.sharedInstance.delegate = this
+                
                 isInitialized = true
                 
                 // Load initial customer info
@@ -204,5 +209,21 @@ class RevenueCatManagerImpl : RevenueCatManager {
         _customerInfo.value = customerInfo
         _isUserSubscribed.value = customerInfo.entitlements.values.any { it.isActive }
         _isPremiumActive.value = customerInfo.entitlements[RevenueCatConfig.Entitlements.PREMIUM]?.isActive == true
+    }
+    
+    // PurchasesDelegate methods - automatically called when CustomerInfo changes
+    override fun onCustomerInfoUpdated(customerInfo: RCCustomerInfo) {
+        val convertedCustomerInfo = convertCustomerInfo(customerInfo)
+        updateCustomerInfoState(convertedCustomerInfo)
+        println("RevenueCat: Customer info updated automatically - isPremium: ${_isPremiumActive.value}")
+    }
+    
+    override fun onPurchasePromoProduct(
+        product: com.revenuecat.purchases.kmp.models.StoreProduct,
+        startPurchase: (onError: (error: com.revenuecat.purchases.kmp.models.PurchasesError, userCancelled: Boolean) -> Unit, onSuccess: (storeTransaction: com.revenuecat.purchases.kmp.models.StoreTransaction, customerInfo: RCCustomerInfo) -> Unit) -> Unit
+    ) {
+        // Handle promotional purchases if needed
+        // For now, we'll just log and ignore
+        println("RevenueCat: Promotional purchase requested for product: ${product.id}")
     }
 }

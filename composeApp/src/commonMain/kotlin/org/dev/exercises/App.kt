@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,6 +22,9 @@ import org.dev.exercises.presentation.subscription.RevenueCatPaywallScreen
 import org.dev.exercises.theme.AppTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplication
+import org.koin.compose.koinInject
+import org.dev.exercises.data.subscription.RevenueCatManager
+import org.dev.exercises.data.subscription.RevenueCatConfig
 
 // Navigation routes
 @Serializable
@@ -43,6 +47,16 @@ internal fun App() = AppTheme {
         modules(appModule)
     }) {
         val navController = rememberNavController()
+        val revenueCatManager: RevenueCatManager = koinInject()
+
+        // Initialize RevenueCat when the app starts
+        LaunchedEffect(Unit) {
+            try {
+                revenueCatManager.initialize(RevenueCatConfig.API_KEY)
+            } catch (e: Exception) {
+                println("Failed to initialize RevenueCat: ${e.message}")
+            }
+        }
 
         Scaffold(
             modifier = Modifier
@@ -58,6 +72,9 @@ internal fun App() = AppTheme {
                     MuscleListScreen(
                         onMuscleClick = { bodyPart ->
                             navController.navigate(ExerciseList(bodyPart.name))
+                        },
+                        onDirectExerciseClick = { exerciseId, bodyPart ->
+                            navController.navigate(ExerciseDetail(exerciseId, bodyPart))
                         },
                         onSubscriptionClick = {
                             navController.navigate(SubscriptionPage)

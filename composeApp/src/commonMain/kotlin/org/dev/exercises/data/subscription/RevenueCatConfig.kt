@@ -15,6 +15,6 @@ object RevenueCatConfig {
     
     // Entitlement identifiers
     object Entitlements {
-        const val PREMIUM = "premium"
+        const val PREMIUM = "Full Fitness"
     }
 }
