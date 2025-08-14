@@ -1,24 +1,13 @@
 package org.dev.exercises
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -28,7 +17,6 @@ import org.dev.exercises.di.appModule
 import org.dev.exercises.presentation.screen.ExerciseDetailScreen
 import org.dev.exercises.presentation.screen.ExercisesScreen
 import org.dev.exercises.presentation.screen.MuscleListScreen
-import org.dev.exercises.presentation.screen.ProfileScreen
 import org.dev.exercises.presentation.subscription.RevenueCatPaywallScreen
 import org.dev.exercises.theme.AppTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -47,8 +35,6 @@ data class ExerciseDetail(val exerciseId: String, val bodyPart: String)
 @Serializable
 object SubscriptionPage
 
-@Serializable
-object Profile
 
 @Preview
 @Composable
@@ -57,40 +43,11 @@ internal fun App() = AppTheme {
         modules(appModule)
     }) {
         val navController = rememberNavController()
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentDestination = navBackStackEntry?.destination
 
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.safeDrawing),
-            bottomBar = {
-                // Only show bottom bar on main screens
-                if (shouldShowBottomBar(currentDestination?.route)) {
-                    NavigationBar {
-                        NavigationBarItem(
-                            icon = { Text("🏠") },
-                            label = { Text("Home") },
-                            selected = currentDestination?.hierarchy?.any { it.route == MuscleList::class.qualifiedName } == true,
-                            onClick = {
-                                navController.navigate(MuscleList) {
-                                    popUpTo(MuscleList) { inclusive = true }
-                                }
-                            }
-                        )
-                        NavigationBarItem(
-                            icon = { Text("👤") },
-                            label = { Text("Profile") },
-                            selected = currentDestination?.hierarchy?.any { it.route == Profile::class.qualifiedName } == true,
-                            onClick = {
-                                navController.navigate(Profile) {
-                                    popUpTo(MuscleList)
-                                }
-                            }
-                        )
-                    }
-                }
-            }
+                .windowInsetsPadding(WindowInsets.safeDrawing)
         ) { paddingValues ->
             NavHost(
                 navController = navController,
@@ -108,9 +65,6 @@ internal fun App() = AppTheme {
                     )
                 }
 
-                composable<Profile> {
-                    ProfileScreen()
-                }
 
                 composable<SubscriptionPage> {
                     RevenueCatPaywallScreen(
@@ -152,7 +106,3 @@ internal fun App() = AppTheme {
     }
 }
 
-private fun shouldShowBottomBar(route: String?): Boolean {
-    return route == MuscleList::class.qualifiedName || 
-           route == Profile::class.qualifiedName
-}

@@ -19,27 +19,23 @@ fun RevenueCatPaywallScreen(
     val viewModel: RevenueCatPaywallViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsState()
     val isUserSubscribed by viewModel.isUserSubscribed.collectAsState()
-    
+
     // Initialize RevenueCat and load offering
     LaunchedEffect(Unit) {
         viewModel.loadOffering()
     }
-    
+
     // Navigate back if user becomes subscribed
     LaunchedEffect(isUserSubscribed) {
         if (isUserSubscribed) {
             onSubscriptionSuccess()
         }
     }
-    
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Header with back button
-        PaywallHeader(
-            onBackClick = onBackClick
-        )
-        
+
         // RevenueCat Paywall UI
         when (val currentState = uiState) {
             is RevenueCatPaywallState.Loading -> {
@@ -50,7 +46,7 @@ fun RevenueCatPaywallScreen(
                     CircularProgressIndicator()
                 }
             }
-            
+
             is RevenueCatPaywallState.Success -> {
                 val options = remember {
                     PaywallOptions(
@@ -60,10 +56,10 @@ fun RevenueCatPaywallScreen(
                         shouldDisplayDismissButton = true
                     }
                 }
-                
+
                 Paywall(options)
             }
-            
+
             is RevenueCatPaywallState.Error -> {
                 Column(
                     modifier = Modifier
@@ -77,16 +73,16 @@ fun RevenueCatPaywallScreen(
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.error
                     )
-                    
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    
+
                     Text(
                         text = currentState.message,
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    
+
                     Button(
                         onClick = { viewModel.loadOffering() }
                     ) {
@@ -94,38 +90,6 @@ fun RevenueCatPaywallScreen(
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun PaywallHeader(
-    onBackClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        shadowElevation = 1.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextButton(
-                onClick = onBackClick
-            ) {
-                Text("← Back")
-            }
-            
-            Spacer(modifier = Modifier.weight(1f))
-            
-            Text(
-                text = "XercisePro",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
-            )
         }
     }
 }

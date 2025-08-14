@@ -32,7 +32,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import org.dev.exercises.domain.model.Exercise
-import org.dev.exercises.presentation.components.LabeledInfoBubbleRow
 import org.dev.exercises.presentation.components.PremiumVideoSection
 import org.dev.exercises.presentation.utils.toDisplayText
 import org.dev.exercises.presentation.viewmodel.ExerciseViewModel
@@ -262,8 +261,8 @@ private fun ExerciseDetailContent(
             }
         }
 
-        // Exercise Tips
-        if (!exercise.exerciseTips.isNullOrEmpty()) {
+        // Exercise Tips (Premium only)
+        if (!exercise.exerciseTips.isNullOrEmpty() && isSubscribed) {
             item {
                 SectionCard(
                     title = "Exercise Tips",
@@ -288,8 +287,8 @@ private fun ExerciseDetailContent(
             }
         }
 
-        // Variations
-        if (!exercise.variations.isNullOrEmpty()) {
+        // Variations (Premium only)
+        if (!exercise.variations.isNullOrEmpty() && isSubscribed) {
             item {
                 SectionCard(
                     title = "Variations",
@@ -314,10 +313,6 @@ private fun ExerciseDetailContent(
             }
         }
 
-        // Exercise Information
-        item {
-            ExerciseInfoCard(exercise = exercise)
-        }
     }
 }
 
@@ -383,57 +378,3 @@ private fun SectionCard(
     }
 }
 
-@Composable
-private fun ExerciseInfoCard(exercise: Exercise) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = "Exercise Information",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                LabeledInfoBubbleRow(
-                    label = "Body Parts",
-                    items = exercise.bodyParts,
-                    backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                    textColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-
-                LabeledInfoBubbleRow(
-                    label = "Equipment",
-                    items = exercise.equipments,
-                    backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    textColor = MaterialTheme.colorScheme.onTertiaryContainer
-                )
-
-                LabeledInfoBubbleRow(
-                    label = "Target Muscles",
-                    items = exercise.targetMuscles,
-                    backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
-                    textColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-
-                LabeledInfoBubbleRow(
-                    label = "Secondary Muscles",
-                    items = exercise.secondaryMuscles,
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
-                    textColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}

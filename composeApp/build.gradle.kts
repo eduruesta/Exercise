@@ -66,6 +66,7 @@ kotlin {
             // RevenueCat (temporarily disabled due to library issues)
             implementation(libs.purchases.core)
             implementation(libs.purchases.ui)
+            implementation("io.github.khubaibkhan4:mediaplayer-kmp:2.0.9")
 
         }
 
